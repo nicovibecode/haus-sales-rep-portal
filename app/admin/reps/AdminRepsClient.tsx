@@ -189,7 +189,7 @@ export default function AdminRepsClient({
                           const current = prev[selectedEmail] ?? [];
                           return {
                             ...prev,
-                            [selectedEmail]: [...new Set([...current, ...ids])],
+                            [selectedEmail]: Array.from(new Set([...current, ...ids])),
                           };
                         });
                         setSaved(false);

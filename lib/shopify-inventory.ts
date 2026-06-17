@@ -31,7 +31,7 @@ export async function fetchShopifyInventory(): Promise<InventoryMap> {
   let cursor: string | null = null;
 
   do {
-    const res = await fetch(`https://${domain}/admin/api/2024-01/graphql.json`, {
+    const res: Response = await fetch(`https://${domain}/admin/api/2024-01/graphql.json`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,8 +41,10 @@ export async function fetchShopifyInventory(): Promise<InventoryMap> {
       next: { revalidate: 300 }, // cache 5 minutes
     });
 
-    const json = await res.json();
-    const page = json?.data?.products;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const json: any = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const page: any = json?.data?.products;
     if (!page) break;
 
     for (const product of page.nodes) {

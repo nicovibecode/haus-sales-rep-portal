@@ -6,13 +6,14 @@ import productsData from "@/data/products.json";
 export default async function OrdersPage() {
   const session = await getSession();
 
-  let orders: Record<string, unknown>[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let orders: any[] = [];
   try {
     const result = await db.execute({
       sql: "SELECT * FROM orders WHERE rep_email = ? ORDER BY created_at DESC",
       args: [session?.repEmail ?? ""],
     });
-    orders = result.rows as unknown as Record<string, unknown>[];
+    orders = result.rows as unknown as any[];
   } catch {
     // DB not yet configured – show empty state
   }

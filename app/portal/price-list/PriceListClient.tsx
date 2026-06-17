@@ -2,8 +2,9 @@
 import { useState } from "react";
 import ProductDetailPanel, { ProductForPanel } from "@/components/ProductDetailPanel";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Product extends ProductForPanel {
-  detail?: unknown;
+  detail?: any;
 }
 
 interface Group {
