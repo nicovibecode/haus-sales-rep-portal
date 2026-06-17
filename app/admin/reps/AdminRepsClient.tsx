@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Product {
   id: string;
@@ -43,6 +43,49 @@ export default function AdminRepsClient({
   );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Invite state
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteRole, setInviteRole] = useState("rep-a");
+  const [inviting, setInviting] = useState(false);
+  const [inviteLink, setInviteLink] = useState("");
+  const [inviteEmailSent, setInviteEmailSent] = useState(false);
+  const [inviteError, setInviteError] = useState("");
+  const [pastInvites, setPastInvites] = useState<{ email: string; role: string; used_at: string | null; created_at: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/invite").then(r => r.json()).then(d => setPastInvites(d.invites ?? []));
+  }, [inviteLink]);
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault();
+    setInviting(true);
+    setInviteLink("");
+    setInviteError("");
+    const res = await fetch("/api/admin/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: inviteEmail, role: inviteRole, name: inviteName }),
+    });
+    const data = await res.json();
+    setInviting(false);
+    if (res.ok) {
+      setInviteLink(data.inviteUrl);
+      setInviteEmailSent(data.emailSent);
+      setInviteEmail("");
+      setInviteName("");
+    } else {
+      setInviteError(data.error ?? "Failed to create invite");
+    }
+  }
+
+  const ROLE_LABELS: Record<string, string> = {
+    "rep-a": "Sales Rep — Tier A",
+    "rep-b": "Sales Rep — Tier B",
+    "rep-c": "Sales Rep — Tier C",
+    "admin": "Admin",
+  };
 
   const rep = reps.find((r) => r.email === selectedEmail)!;
   const repDisabled = disabled[selectedEmail] ?? [];
@@ -98,6 +141,82 @@ export default function AdminRepsClient({
         <p className="text-sm text-stone-500 mt-1">
           Control product visibility and discount limits per rep.
         </p>
+      </div>
+
+      {/* Invite section */}
+      <div className="bg-white border border-stone-200 rounded-xl p-6 mb-8">
+        <h2 className="text-sm font-semibold text-stone-700 mb-1">Invite Someone</h2>
+        <p className="text-xs text-stone-400 mb-5">Send an invite link to a new sales rep or admin.</p>
+        <form onSubmit={handleInvite} className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+          <input
+            type="text"
+            value={inviteName}
+            onChange={e => setInviteName(e.target.value)}
+            placeholder="Their name (optional)"
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+          />
+          <input
+            type="email"
+            value={inviteEmail}
+            onChange={e => setInviteEmail(e.target.value)}
+            placeholder="Email address"
+            required
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+          />
+          <select
+            value={inviteRole}
+            onChange={e => setInviteRole(e.target.value)}
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+          >
+            <option value="rep-a">Sales Rep — Tier A</option>
+            <option value="rep-b">Sales Rep — Tier B</option>
+            <option value="rep-c">Sales Rep — Tier C</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button
+            type="submit"
+            disabled={inviting}
+            className="bg-stone-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-stone-700 disabled:opacity-50 transition-colors"
+          >
+            {inviting ? "Sending…" : "Send Invite"}
+          </button>
+        </form>
+
+        {inviteError && <p className="text-sm text-red-600 mt-3">{inviteError}</p>}
+
+        {inviteLink && (
+          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm font-medium text-emerald-800 mb-1">
+              {inviteEmailSent ? "Invite email sent!" : "Invite created — copy this link to share:"}
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="text-xs text-emerald-700 break-all flex-1">{inviteLink}</code>
+              <button
+                onClick={() => navigator.clipboard.writeText(inviteLink)}
+                className="text-xs text-emerald-700 border border-emerald-300 px-2 py-1 rounded hover:bg-emerald-100 flex-shrink-0"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        )}
+
+        {pastInvites.length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Recent Invites</p>
+            <div className="space-y-2">
+              {pastInvites.map((inv, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <span className="text-stone-700">{inv.email}</span>
+                  <span className="text-xs text-stone-400">{ROLE_LABELS[inv.role] ?? inv.role}</span>
+                  <span className={`text-xs font-medium ${inv.used_at ? "text-emerald-600" : "text-amber-600"}`}>
+                    {inv.used_at ? "Accepted" : "Pending"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Rep selector */}
