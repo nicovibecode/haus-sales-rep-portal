@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --stone-50: #fafaf9;
+  --stone-100: #f5f5f4;
+  --stone-200: #e7e5e4;
+  --stone-800: #292524;
+}
+
+body {
+  background-color: var(--stone-50);
+  color: var(--stone-800);
+}

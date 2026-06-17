@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/nicholasyuh/.nvm/versions/**)",
+      "Read(//Users/nicholasyuh/**)",
+      "Read(//usr/local/lib/**)",
+      "Read(//usr/**)",
+      "Bash(python3 -)",
+      "Bash(PYTHONPATH=/Users/nicholasyuh/Library/Python/3.9/lib/python/site-packages python3 -)",
+      "Bash(python scripts/office/unpack.py \"/Users/nicholasyuh/Downloads/BSD_HAUS_Outside_Sales_Rep_Agreement \\(3\\).docx\" /tmp/bsdhaus_agreement/)",
+      "Bash(pandoc \"/Users/nicholasyuh/Downloads/BSD_HAUS_Outside_Sales_Rep_Agreement \\(3\\).docx\" -t plain)",
+      "Bash(python3 scripts/office/unpack.py \"/Users/nicholasyuh/Downloads/BSD_HAUS_Outside_Sales_Rep_Agreement \\(3\\).docx\" /tmp/bsdhaus_agreement/)",
+      "WebFetch(domain:bsdhaus.com)",
+      "Bash(cp \"/Users/nicholasyuh/Downloads/sales reps sheet final.pdf\" \"/Users/nicholasyuh/Desktop/Claude Code \\(HAUS SALES REP PORTAL\\)/public/downloads/sales-rep-sheet.pdf\")",
+      "Bash(cp \"/Users/nicholasyuh/Downloads/BSD HAUS Sales Representative Price List.xlsx\" \"/Users/nicholasyuh/Desktop/Claude Code \\(HAUS SALES REP PORTAL\\)/public/downloads/price-list.xlsx\")",
+      "mcp__afcf2fa4-f28d-42e5-91c7-c4987218fcd4__graphql_query",
+      "Bash(python3 -m json.tool)",
+      "Bash(npx ts-node *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(gh repo *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Bash(git update-ref *)"
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "rep-001",
+    "name": "Marcus Rivera",
+    "region": "Los Angeles – West Side",
+    "email": "marcus@bsdhaus.com",
+    "phone": "(310) 555-0101",
+    "status": "Active"
+  },
+  {
+    "id": "rep-002",
+    "name": "Sofia Delgado",
+    "region": "Orange County – North",
+    "email": "sofia@bsdhaus.com",
+    "phone": "(714) 555-0202",
+    "status": "Active"
+  },
+  {
+    "id": "rep-003",
+    "name": "James Thornton",
+    "region": "San Diego",
+    "email": "james@bsdhaus.com",
+    "phone": "(619) 555-0303",
+    "status": "Active"
+  },
+  {
+    "id": "rep-004",
+    "name": "Priya Nair",
+    "region": "Los Angeles – Valley",
+    "email": "priya@bsdhaus.com",
+    "phone": "(818) 555-0404",
+    "status": "Active"
+  },
+  {
+    "id": "rep-005",
+    "name": "Carlos Mendez",
+    "region": "Inland Empire",
+    "email": "carlos@bsdhaus.com",
+    "phone": "(951) 555-0505",
+    "status": "Active"
+  },
+  {
+    "id": "rep-006",
+    "name": "Ashley Kim",
+    "region": "Orange County – South",
+    "email": "ashley@bsdhaus.com",
+    "phone": "(949) 555-0606",
+    "status": "Active"
+  },
+  {
+    "id": "rep-007",
+    "name": "Trevor Banks",
+    "region": "Los Angeles – Downtown",
+    "email": "trevor@bsdhaus.com",
+    "phone": "(213) 555-0707",
+    "status": "Inactive"
+  },
+  {
+    "id": "rep-008",
+    "name": "Diana Flores",
+    "region": "Ventura County",
+    "email": "diana@bsdhaus.com",
+    "phone": "(805) 555-0808",
+    "status": "Active"
+  },
+  {
+    "id": "rep-009",
+    "name": "Ryan Okafor",
+    "region": "Long Beach / South Bay",
+    "email": "ryan@bsdhaus.com",
+    "phone": "(562) 555-0909",
+    "status": "Active"
+  }
+]
