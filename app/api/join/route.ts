@@ -3,9 +3,10 @@ import { db } from "@/lib/db";
 import { createSession, COOKIE_NAME } from "@/lib/session";
 
 const ROLE_TO_TIER: Record<string, string> = {
+  "rep": "A",
   "rep-a": "A",
-  "rep-b": "B",
-  "rep-c": "C",
+  "rep-b": "A",
+  "rep-c": "A",
   "admin": "admin",
 };
 

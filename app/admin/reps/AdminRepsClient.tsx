@@ -47,7 +47,7 @@ export default function AdminRepsClient({
   // Invite state
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
-  const [inviteRole, setInviteRole] = useState("rep-a");
+  const [inviteRole, setInviteRole] = useState("rep");
   const [inviting, setInviting] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
   const [inviteEmailSent, setInviteEmailSent] = useState(false);
@@ -81,9 +81,10 @@ export default function AdminRepsClient({
   }
 
   const ROLE_LABELS: Record<string, string> = {
-    "rep-a": "Sales Rep — Tier A",
-    "rep-b": "Sales Rep — Tier B",
-    "rep-c": "Sales Rep — Tier C",
+    "rep": "Sales Rep",
+    "rep-a": "Sales Rep",
+    "rep-b": "Sales Rep",
+    "rep-c": "Sales Rep",
     "admin": "Admin",
   };
 
@@ -168,9 +169,7 @@ export default function AdminRepsClient({
             onChange={e => setInviteRole(e.target.value)}
             className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
           >
-            <option value="rep-a">Sales Rep — Tier A</option>
-            <option value="rep-b">Sales Rep — Tier B</option>
-            <option value="rep-c">Sales Rep — Tier C</option>
+            <option value="rep">Sales Rep</option>
             <option value="admin">Admin</option>
           </select>
           <button

@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const ROLE_LABELS: Record<string, string> = {
-  "rep-a": "Sales Rep — Tier A",
-  "rep-b": "Sales Rep — Tier B",
-  "rep-c": "Sales Rep — Tier C",
+  "rep": "Sales Rep",
+  "rep-a": "Sales Rep",
+  "rep-b": "Sales Rep",
+  "rep-c": "Sales Rep",
   "admin": "Admin",
 };
 
