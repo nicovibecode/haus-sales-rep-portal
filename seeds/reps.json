@@ -8,5 +8,15 @@
     "region": "Southern California",
     "phone": "",
     "status": "Active"
+  },
+  {
+    "id": "admin-nick",
+    "name": "Nick",
+    "email": "nry.yuh@gmail.com",
+    "plain_password": "BSDhaus2024!",
+    "tier": "admin",
+    "region": "",
+    "phone": "",
+    "status": "Active"
   }
 ]
