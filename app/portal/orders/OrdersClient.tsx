@@ -65,6 +65,7 @@ function OrdersInner({
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState<{ id: string; commission: string } | null>(null);
   const [taxExempt, setTaxExempt] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   // Shipping state
   const [shippingMethod, setShippingMethod] = useState<"ltl" | "ups" | "pickup">("ltl");
@@ -123,34 +124,48 @@ function OrdersInner({
     if (!pushed) return;
     setLoading(true);
     setConfirmed(null);
+    setSubmitError("");
 
-    const res = await fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        tax_exempt: taxExempt,
-        product: pushed.productName,
-        quantity_sqft: parseFloat(pushed.finalSqft),
-        boxes_needed: parseInt(pushed.boxesNeeded),
-        retail_price_sqft: parseFloat(pushed.retailPriceSqft),
-        client_price_sqft: parseFloat(pushed.clientPriceSqft),
-        discount_pct: parseFloat(pushed.discountPct),
-        retail_total: parseFloat(pushed.retailTotal),
-        client_total: parseFloat(pushed.clientTotal),
-        commission_amount: parseFloat(pushed.commission),
-      }),
-    });
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          tax_exempt: taxExempt,
+          product: pushed.productName,
+          quantity_sqft: parseFloat(pushed.finalSqft),
+          boxes_needed: parseInt(pushed.boxesNeeded),
+          retail_price_sqft: parseFloat(pushed.retailPriceSqft),
+          client_price_sqft: parseFloat(pushed.clientPriceSqft),
+          discount_pct: parseFloat(pushed.discountPct),
+          retail_total: parseFloat(pushed.retailTotal),
+          client_total: parseFloat(pushed.clientTotal),
+          commission_amount: parseFloat(pushed.commission),
+        }),
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      setConfirmed({ id: data.id, commission: pushed.commission });
-      setOrders((prev) => [data, ...prev]);
-      setForm({ client_name: "", client_email: "", client_phone: "", shipping_address: "", notes: "" });
-      setTaxExempt(false);
-      window.history.replaceState({}, "", "/portal/orders");
+      let data: Record<string, unknown> = {};
+      try {
+        data = await res.json();
+      } catch {
+        // empty/non-JSON body
+      }
+
+      if (res.ok) {
+        setConfirmed({ id: data.id as string, commission: pushed.commission });
+        setOrders((prev) => [data as unknown as Order, ...prev]);
+        setForm({ client_name: "", client_email: "", client_phone: "", shipping_address: "", notes: "" });
+        setTaxExempt(false);
+        window.history.replaceState({}, "", "/portal/orders");
+      } else {
+        setSubmitError((data.error as string) || `Submission failed (${res.status})`);
+      }
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Network error — please try again");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -370,6 +385,12 @@ function OrdersInner({
                 </p>
               )}
             </div>
+
+            {submitError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {submitError}
+              </p>
+            )}
 
             <div className="flex gap-3">
               <button type="button" onClick={() => window.history.back()} className="flex-1 border border-stone-300 text-stone-700 py-2.5 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
