@@ -15,24 +15,28 @@ export async function POST(req: NextRequest) {
   }
 
   // Ensure tables exist
-  await db.execute(`CREATE TABLE IF NOT EXISTS invites (
-    token TEXT PRIMARY KEY,
-    email TEXT NOT NULL,
-    role TEXT NOT NULL,
-    name TEXT,
-    created_at TEXT NOT NULL,
-    expires_at TEXT NOT NULL,
-    used_at TEXT
-  )`);
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS invites (
+      token TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      role TEXT NOT NULL,
+      name TEXT,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      used_at TEXT
+    )`);
+  } catch { /* already exists */ }
 
-  await db.execute(`CREATE TABLE IF NOT EXISTS portal_users (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  )`);
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS portal_users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      role TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )`);
+  } catch { /* already exists */ }
 
   const token = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -91,7 +95,9 @@ export async function GET(req: NextRequest) {
       expires_at TEXT NOT NULL,
       used_at TEXT
     )`);
+  } catch { /* already exists */ }
 
+  try {
     const result = await db.execute(
       "SELECT token, email, role, name, created_at, used_at FROM invites ORDER BY created_at DESC LIMIT 50"
     );

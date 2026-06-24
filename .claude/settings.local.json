@@ -28,7 +28,9 @@
       "Bash(npm install *)",
       "Bash(sudo npm install -g vercel)",
       "Bash(npx tsc *)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(curl -s -I https://haus-sales-rep-portal.vercel.app/)",
+      "Bash(~/.npm-global/bin/vercel logs *)"
     ]
   }
 }

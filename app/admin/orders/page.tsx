@@ -4,6 +4,7 @@ import AdminOrdersClient from "./AdminOrdersClient";
 export default async function AdminOrdersPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let orders: any[] = [];
+
   try {
     await db.execute(`CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY, rep_name TEXT, rep_email TEXT, client_name TEXT,
@@ -13,9 +14,13 @@ export default async function AdminOrdersPage() {
       client_total REAL, commission_amount REAL, notes TEXT, status TEXT, created_at TEXT,
       commission_paid TEXT
     )`);
-    try {
-      await db.execute("ALTER TABLE orders ADD COLUMN commission_paid TEXT");
-    } catch { /* already exists */ }
+  } catch { /* table likely already exists */ }
+
+  try {
+    await db.execute("ALTER TABLE orders ADD COLUMN commission_paid TEXT");
+  } catch { /* already exists */ }
+
+  try {
     const result = await db.execute(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );

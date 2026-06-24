@@ -29,28 +29,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // Ensure table exists
-  await db.execute(`CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    rep_name TEXT,
-    rep_email TEXT,
-    client_name TEXT,
-    client_email TEXT,
-    client_phone TEXT,
-    shipping_address TEXT,
-    product TEXT,
-    quantity_sqft REAL,
-    boxes_needed INTEGER,
-    retail_price_sqft REAL,
-    client_price_sqft REAL,
-    discount_pct REAL,
-    retail_total REAL,
-    client_total REAL,
-    commission_amount REAL,
-    notes TEXT,
-    status TEXT,
-    created_at TEXT
-  )`);
+  // Ensure table exists (ignore errors if it already does, or if DDL isn't supported in this request context)
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY,
+      rep_name TEXT,
+      rep_email TEXT,
+      client_name TEXT,
+      client_email TEXT,
+      client_phone TEXT,
+      shipping_address TEXT,
+      product TEXT,
+      quantity_sqft REAL,
+      boxes_needed INTEGER,
+      retail_price_sqft REAL,
+      client_price_sqft REAL,
+      discount_pct REAL,
+      retail_total REAL,
+      client_total REAL,
+      commission_amount REAL,
+      notes TEXT,
+      status TEXT,
+      created_at TEXT,
+      commission_paid TEXT
+    )`);
+  } catch {
+    // table likely already exists
+  }
 
   const id = uuidv4();
   const created_at = new Date().toISOString();

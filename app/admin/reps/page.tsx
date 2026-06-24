@@ -44,6 +44,9 @@ export default async function AdminRepsPage() {
       max_discounts TEXT NOT NULL DEFAULT '{"Marble Mosaics":30,"Travertine":30,"Ceramics":15}',
       updated_at TEXT
     )`);
+  } catch { /* already exists */ }
+
+  try {
     await db.execute({
       sql: `INSERT OR IGNORE INTO rep_settings (rep_email, disabled_product_ids, max_discounts, updated_at)
             VALUES (?, '[]', '{"Marble Mosaics":30,"Travertine":30,"Ceramics":15}', datetime('now'))`,
