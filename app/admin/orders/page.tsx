@@ -10,8 +10,12 @@ export default async function AdminOrdersPage() {
       client_email TEXT, client_phone TEXT, shipping_address TEXT, product TEXT,
       quantity_sqft REAL, boxes_needed INTEGER, retail_price_sqft REAL,
       client_price_sqft REAL, discount_pct REAL, retail_total REAL,
-      client_total REAL, commission_amount REAL, notes TEXT, status TEXT, created_at TEXT
+      client_total REAL, commission_amount REAL, notes TEXT, status TEXT, created_at TEXT,
+      commission_paid TEXT
     )`);
+    try {
+      await db.execute("ALTER TABLE orders ADD COLUMN commission_paid TEXT");
+    } catch { /* already exists */ }
     const result = await db.execute(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );

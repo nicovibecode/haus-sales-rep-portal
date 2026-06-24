@@ -16,6 +16,7 @@ interface Order {
   client_total: number | null;
   discount_pct: number | null;
   commission_amount: number | null;
+  commission_paid: string | null;
   notes: string;
   status: string;
   created_at: string;
@@ -52,6 +53,27 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
     }
   }
 
+  async function toggleCommissionPaid(id: string, currentlyPaid: boolean) {
+    const commission_paid = currentlyPaid ? null : new Date().toISOString();
+    const res = await fetch(`/api/admin/orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commission_paid }),
+    });
+    if (res.ok) {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, commission_paid } : o))
+      );
+    }
+  }
+
+  const totalOwed = orders
+    .filter((o) => !o.commission_paid)
+    .reduce((sum, o) => sum + (o.commission_amount ? Number(o.commission_amount) : 0), 0);
+  const totalPaid = orders
+    .filter((o) => o.commission_paid)
+    .reduce((sum, o) => sum + (o.commission_amount ? Number(o.commission_amount) : 0), 0);
+
   const filtered = orders.filter((o) => {
     const matchSearch =
       !search ||
@@ -63,6 +85,17 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
 
   return (
     <div>
+      <div className="flex gap-4 mb-6">
+        <div className="bg-white border border-stone-200 rounded-xl px-5 py-4 flex-1">
+          <p className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-1">Commission Owed</p>
+          <p className="text-xl font-bold text-amber-700">${fmt(totalOwed)}</p>
+        </div>
+        <div className="bg-white border border-stone-200 rounded-xl px-5 py-4 flex-1">
+          <p className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-1">Commission Paid</p>
+          <p className="text-xl font-bold text-emerald-700">${fmt(totalPaid)}</p>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-stone-800">All Orders</h1>
         <div className="flex gap-3">
@@ -87,7 +120,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-stone-200 bg-stone-50">
-              {["Order ID", "Rep", "Client", "Product", "SQFT", "Client Price", "Commission", "Date", "Status"].map((h) => (
+              {["Order ID", "Rep", "Client", "Product", "SQFT", "Client Price", "Commission", "Date", "Status", "Commission Paid"].map((h) => (
                 <th key={h} className="text-left px-4 py-3 font-medium text-stone-600 text-xs">{h}</th>
               ))}
             </tr>
@@ -95,7 +128,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
           <tbody className="divide-y divide-stone-100">
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-stone-400 text-sm">
+                <td colSpan={10} className="px-4 py-8 text-center text-stone-400 text-sm">
                   No orders found.
                 </td>
               </tr>
@@ -137,6 +170,18 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => toggleCommissionPaid(o.id, !!o.commission_paid)}
+                    className={`text-xs font-medium px-2 py-1 rounded-full cursor-pointer transition-colors ${
+                      o.commission_paid ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"
+                    }`}
+                  >
+                    {o.commission_paid
+                      ? `Paid ${new Date(o.commission_paid).toLocaleDateString()}`
+                      : "Mark Paid"}
+                  </button>
                 </td>
               </tr>
             ))}
