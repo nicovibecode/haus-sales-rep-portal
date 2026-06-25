@@ -38,10 +38,12 @@ export default function OrderDetailDrawer({
   order,
   onClose,
   showRep = false,
+  onDeleteClick,
 }: {
   order: OrderDetail | null;
   onClose: () => void;
   showRep?: boolean;
+  onDeleteClick?: (order: OrderDetail) => void;
 }) {
   if (!order) return null;
 
@@ -129,6 +131,15 @@ export default function OrderDetailDrawer({
             <Section title="Notes / Special Instructions">
               <p className="text-sm text-stone-700 whitespace-pre-wrap">{order.notes}</p>
             </Section>
+          )}
+
+          {onDeleteClick && (
+            <button
+              onClick={() => onDeleteClick(order)}
+              className="w-full text-sm font-medium text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg py-2.5 transition-colors"
+            >
+              Delete Order
+            </button>
           )}
         </div>
       </div>

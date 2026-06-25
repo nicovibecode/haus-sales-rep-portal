@@ -23,10 +23,12 @@ export default function SampleDetailDrawer({
   sample,
   onClose,
   showRep = false,
+  onDeleteClick,
 }: {
   sample: SampleDetail | null;
   onClose: () => void;
   showRep?: boolean;
+  onDeleteClick?: (sample: SampleDetail) => void;
 }) {
   if (!sample) return null;
 
@@ -94,6 +96,15 @@ export default function SampleDetailDrawer({
             <Section title="Notes">
               <p className="text-sm text-stone-700 whitespace-pre-wrap">{sample.notes}</p>
             </Section>
+          )}
+
+          {onDeleteClick && (
+            <button
+              onClick={() => onDeleteClick(sample)}
+              className="w-full text-sm font-medium text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg py-2.5 transition-colors"
+            >
+              Delete Sample Request
+            </button>
           )}
         </div>
       </div>

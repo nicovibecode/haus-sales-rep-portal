@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { SessionPayload } from "@/lib/session";
 import { getZoneFromZip, calcLTLShipping } from "@/lib/shipping";
 import OrderDetailDrawer, { OrderDetail } from "@/components/OrderDetailDrawer";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface Order {
   id: string;
@@ -75,6 +76,20 @@ function OrdersInner({
   const [taxExempt, setTaxExempt] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDeleteOrder() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const res = await fetch(`/api/orders/${deleteTarget.id}`, { method: "DELETE" });
+    if (res.ok) {
+      setOrders((prev) => prev.filter((o) => o.id !== deleteTarget.id));
+      setSelectedOrder(null);
+    }
+    setDeleting(false);
+    setDeleteTarget(null);
+  }
 
   // Shipping state
   const [shippingMethod, setShippingMethod] = useState<"ltl" | "ups" | "pickup">("ltl");
@@ -480,6 +495,16 @@ function OrdersInner({
       <OrderDetailDrawer
         order={selectedOrder as OrderDetail | null}
         onClose={() => setSelectedOrder(null)}
+        onDeleteClick={(o) => setDeleteTarget(o as unknown as Order)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete this order?"
+        message={`Are you sure you want to delete the order for "${deleteTarget?.client_name}"? This cannot be undone.`}
+        onConfirm={handleDeleteOrder}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
       />
     </div>
   );

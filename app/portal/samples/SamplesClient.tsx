@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { SessionPayload } from "@/lib/session";
 import SampleDetailDrawer, { SampleDetail } from "@/components/SampleDetailDrawer";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface Sample {
   id: string;
@@ -34,6 +35,20 @@ export default function SamplesClient({
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [selectedSample, setSelectedSample] = useState<Sample | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Sample | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDeleteSample() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const res = await fetch(`/api/samples/${deleteTarget.id}`, { method: "DELETE" });
+    if (res.ok) {
+      setSamples((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      setSelectedSample(null);
+    }
+    setDeleting(false);
+    setDeleteTarget(null);
+  }
 
   const [form, setForm] = useState({
     client_name: "",
@@ -180,6 +195,16 @@ export default function SamplesClient({
       <SampleDetailDrawer
         sample={selectedSample as SampleDetail | null}
         onClose={() => setSelectedSample(null)}
+        onDeleteClick={(s) => setDeleteTarget(s as unknown as Sample)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete this sample request?"
+        message={`Are you sure you want to delete the sample request for "${deleteTarget?.client_name}"? This cannot be undone.`}
+        onConfirm={handleDeleteSample}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
       />
     </div>
   );

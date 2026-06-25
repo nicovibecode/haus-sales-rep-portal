@@ -37,7 +37,8 @@
       "Bash(npm view *)",
       "Bash(~/.npm-global/bin/vercel inspect *)",
       "Bash(echo \"exit:$?\")",
-      "Bash(curl -s -I https://haus-sales-rep-portal.vercel.app/admin/orders)"
+      "Bash(curl -s -I https://haus-sales-rep-portal.vercel.app/admin/orders)",
+      "Bash(grep -n \"Notes\\\\|/Section>$\\\\|</div>\\\\s*$\\\\|^      </div>\" \"/Users/nicholasyuh/Desktop/Claude Code \\(HAUS SALES REP PORTAL\\)/components/OrderDetailDrawer.tsx\")"
     ]
   }
 }

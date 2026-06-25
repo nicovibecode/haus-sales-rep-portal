@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import SampleDetailDrawer, { SampleDetail } from "@/components/SampleDetailDrawer";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface Sample {
   id: string;
@@ -27,6 +28,20 @@ export default function AdminSamplesClient({ initialSamples }: { initialSamples:
   const [samples, setSamples] = useState<Sample[]>(initialSamples);
   const [search, setSearch] = useState("");
   const [selectedSample, setSelectedSample] = useState<Sample | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Sample | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDeleteSample() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const res = await fetch(`/api/samples/${deleteTarget.id}`, { method: "DELETE" });
+    if (res.ok) {
+      setSamples((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      setSelectedSample(null);
+    }
+    setDeleting(false);
+    setDeleteTarget(null);
+  }
 
   async function updateStatus(id: string, status: string) {
     const res = await fetch(`/api/admin/samples/${id}`, {
@@ -113,6 +128,16 @@ export default function AdminSamplesClient({ initialSamples }: { initialSamples:
         sample={selectedSample as SampleDetail | null}
         onClose={() => setSelectedSample(null)}
         showRep
+        onDeleteClick={(s) => setDeleteTarget(s as unknown as Sample)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete this sample request?"
+        message={`Are you sure you want to delete the sample request for "${deleteTarget?.client_name}"? This cannot be undone.`}
+        onConfirm={handleDeleteSample}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
       />
     </div>
   );

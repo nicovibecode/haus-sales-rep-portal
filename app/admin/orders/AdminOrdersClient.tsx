@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import OrderDetailDrawer, { OrderDetail } from "@/components/OrderDetailDrawer";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface Order {
   id: string;
@@ -41,6 +42,20 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDeleteOrder() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const res = await fetch(`/api/orders/${deleteTarget.id}`, { method: "DELETE" });
+    if (res.ok) {
+      setOrders((prev) => prev.filter((o) => o.id !== deleteTarget.id));
+      setSelectedOrder(null);
+    }
+    setDeleting(false);
+    setDeleteTarget(null);
+  }
 
   async function updateStatus(id: string, status: string) {
     const res = await fetch(`/api/admin/orders/${id}`, {
@@ -199,6 +214,16 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
         order={selectedOrder as OrderDetail | null}
         onClose={() => setSelectedOrder(null)}
         showRep
+        onDeleteClick={(o) => setDeleteTarget(o as unknown as Order)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete this order?"
+        message={`Are you sure you want to delete the order for "${deleteTarget?.client_name}"? This cannot be undone.`}
+        onConfirm={handleDeleteOrder}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
       />
     </div>
   );
