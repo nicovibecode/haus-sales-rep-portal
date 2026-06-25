@@ -34,7 +34,9 @@
       "Bash(~/.npm-global/bin/vercel ls *)",
       "Bash(node -e ' *)",
       "Bash(npm ls *)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Bash(~/.npm-global/bin/vercel inspect *)",
+      "Bash(echo \"exit:$?\")"
     ]
   }
 }

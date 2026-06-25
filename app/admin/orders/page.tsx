@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import AdminOrdersClient from "./AdminOrdersClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminOrdersPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let orders: any[] = [];
