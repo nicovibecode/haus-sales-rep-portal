@@ -17,6 +17,9 @@ interface Rep {
   name: string;
   email: string;
   tier: string;
+  region?: string;
+  phone?: string;
+  status?: string;
   settings: RepSettings;
 }
 
@@ -52,7 +55,8 @@ export default function AdminRepsClient({
   const [inviteLink, setInviteLink] = useState("");
   const [inviteEmailSent, setInviteEmailSent] = useState(false);
   const [inviteError, setInviteError] = useState("");
-  const [pastInvites, setPastInvites] = useState<{ email: string; role: string; used_at: string | null; created_at: string }[]>([]);
+  const [pastInvites, setPastInvites] = useState<{ token: string; email: string; role: string; used_at: string | null; created_at: string }[]>([]);
+  const [profileRep, setProfileRep] = useState<Rep | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/invite").then(r => r.json()).then(d => setPastInvites(d.invites ?? []));
@@ -204,15 +208,33 @@ export default function AdminRepsClient({
           <div className="mt-5">
             <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Recent Invites</p>
             <div className="space-y-2">
-              {pastInvites.map((inv, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
-                  <span className="text-stone-700">{inv.email}</span>
-                  <span className="text-xs text-stone-400">{ROLE_LABELS[inv.role] ?? inv.role}</span>
-                  <span className={`text-xs font-medium ${inv.used_at ? "text-emerald-600" : "text-amber-600"}`}>
-                    {inv.used_at ? "Accepted" : "Pending"}
-                  </span>
-                </div>
-              ))}
+              {pastInvites.map((inv, i) => {
+                const link = `${typeof window !== "undefined" ? window.location.origin : ""}/join/${inv.token}`;
+                return (
+                  <div key={i} className="flex items-center justify-between text-sm gap-3 py-1.5">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-stone-700">{inv.email}</span>
+                        <span className="text-xs text-stone-400">{ROLE_LABELS[inv.role] ?? inv.role}</span>
+                        <span className={`text-xs font-medium ${inv.used_at ? "text-emerald-600" : "text-amber-600"}`}>
+                          {inv.used_at ? "Accepted" : "Pending"}
+                        </span>
+                      </div>
+                      {!inv.used_at && (
+                        <code className="text-xs text-stone-400 break-all">{link}</code>
+                      )}
+                    </div>
+                    {!inv.used_at && (
+                      <button
+                        onClick={() => navigator.clipboard.writeText(link)}
+                        className="text-xs text-stone-600 border border-stone-300 px-2 py-1 rounded hover:bg-stone-100 flex-shrink-0"
+                      >
+                        Copy
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -221,20 +243,38 @@ export default function AdminRepsClient({
       {/* Rep selector */}
       <div className="flex gap-3 mb-8">
         {reps.map((r) => (
-          <button
+          <div
             key={r.email}
-            onClick={() => { setSelectedEmail(r.email); setSaved(false); }}
-            className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+            className={`flex items-center rounded-xl border transition-colors ${
               selectedEmail === r.email
-                ? "bg-stone-800 text-white border-stone-800"
-                : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+                ? "bg-stone-800 border-stone-800"
+                : "bg-white border-stone-200 hover:border-stone-400"
             }`}
           >
-            {r.name}
-            <span className={`ml-2 text-xs ${selectedEmail === r.email ? "text-stone-400" : "text-stone-400"}`}>
-              Tier {r.tier}
-            </span>
-          </button>
+            <button
+              onClick={() => { setSelectedEmail(r.email); setSaved(false); }}
+              className={`px-4 py-2.5 text-sm font-medium ${
+                selectedEmail === r.email ? "text-white" : "text-stone-700"
+              }`}
+            >
+              {r.name}
+              <span className="ml-2 text-xs text-stone-400">Tier {r.tier}</span>
+            </button>
+            <button
+              onClick={() => setProfileRep(r)}
+              title="View profile"
+              className={`px-2.5 py-2.5 border-l ${
+                selectedEmail === r.email
+                  ? "border-stone-700 text-stone-300 hover:text-white"
+                  : "border-stone-200 text-stone-400 hover:text-stone-700"
+              }`}
+            >
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="5.5" r="2.5" />
+                <path d="M2.5 13.5c0-2.76 2.24-5 5.5-5s5.5 2.24 5.5 5" />
+              </svg>
+            </button>
+          </div>
         ))}
       </div>
 
@@ -365,6 +405,81 @@ export default function AdminRepsClient({
           </button>
         </div>
       </div>
+
+      {/* Rep profile drawer */}
+      {profileRep && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setProfileRep(null)} />
+          <div className="relative w-full max-w-md bg-white h-full shadow-xl overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-stone-800">{profileRep.name}</h2>
+              <button
+                onClick={() => setProfileRep(null)}
+                className="text-stone-400 hover:text-stone-700 text-2xl leading-none px-2"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2.5">Profile</h3>
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-sm text-stone-500">Email</span>
+                    <span className="text-sm text-stone-800">{profileRep.email}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-sm text-stone-500">Tier</span>
+                    <span className="text-sm text-stone-800">Tier {profileRep.tier}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-sm text-stone-500">Region</span>
+                    <span className="text-sm text-stone-800">{profileRep.region || "—"}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-sm text-stone-500">Phone</span>
+                    <span className="text-sm text-stone-800">{profileRep.phone || "—"}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-sm text-stone-500">Status</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${profileRep.status === "Active" ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"}`}>
+                      {profileRep.status || "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2.5">Max Discounts</h3>
+                <div className="space-y-2">
+                  {CATEGORIES.map((cat) => (
+                    <div key={cat} className="flex items-start justify-between gap-3">
+                      <span className="text-sm text-stone-500">{cat}</span>
+                      <span className="text-sm text-stone-800">
+                        {(maxDiscounts[profileRep.email] ?? DEFAULT_MAX)[cat] ?? DEFAULT_MAX[cat]}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2.5">Product Visibility</h3>
+                <p className="text-sm text-stone-800">
+                  {products.length - (disabled[profileRep.email]?.length ?? 0)} of {products.length} products enabled
+                </p>
+              </div>
+
+              <button
+                onClick={() => { setSelectedEmail(profileRep.email); setProfileRep(null); }}
+                className="w-full text-sm font-medium text-stone-700 border border-stone-300 hover:bg-stone-50 rounded-lg py-2.5 transition-colors"
+              >
+                Edit Settings →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

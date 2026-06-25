@@ -1,10 +1,18 @@
 import { db } from "@/lib/db";
 import productsData from "@/data/products.json";
+import repsSeed from "@/seeds/reps.json";
 import AdminRepsClient from "./AdminRepsClient";
 
-const REPS = [
-  { name: "Dominic Foucault", email: "dominicfoucault7@gmail.com", tier: "A" },
-];
+const REPS = repsSeed
+  .filter((r) => r.tier !== "admin")
+  .map((r) => ({
+    name: r.name,
+    email: r.email,
+    tier: r.tier,
+    region: r.region,
+    phone: r.phone,
+    status: r.status,
+  }));
 
 const CATEGORIES = ["Marble Mosaics", "Travertine", "Ceramics"];
 
