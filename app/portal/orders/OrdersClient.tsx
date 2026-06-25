@@ -4,19 +4,27 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { SessionPayload } from "@/lib/session";
 import { getZoneFromZip, calcLTLShipping } from "@/lib/shipping";
+import OrderDetailDrawer, { OrderDetail } from "@/components/OrderDetailDrawer";
 
 interface Order {
   id: string;
   product: string;
   client_name: string;
+  client_email?: string | null;
+  client_phone?: string | null;
+  shipping_address?: string | null;
   created_at: string;
   status: string;
   retail_total?: number | null;
   client_total?: number | null;
+  retail_price_sqft?: number | null;
+  client_price_sqft?: number | null;
   commission_amount?: number | null;
+  commission_paid?: string | null;
   discount_pct?: number | null;
   quantity_sqft?: number | null;
   boxes_needed?: number | null;
+  notes?: string | null;
 }
 
 interface PushedOrder {
@@ -66,6 +74,7 @@ function OrdersInner({
   const [confirmed, setConfirmed] = useState<{ id: string; commission: string } | null>(null);
   const [taxExempt, setTaxExempt] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Shipping state
   const [shippingMethod, setShippingMethod] = useState<"ltl" | "ups" | "pickup">("ltl");
@@ -413,14 +422,18 @@ function OrdersInner({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-stone-200 bg-stone-50">
-                {["Order ID", "Product", "Client", "SQFT", "Client Price", "Commission", "Date", "Status"].map((h) => (
+                {["Order ID", "Product", "Client", "SQFT", "Client Price", "Commission", "Commission Paid", "Date", "Status"].map((h) => (
                   <th key={h} className="text-left px-4 py-3 font-medium text-stone-600 text-xs">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {orders.map((o) => (
-                <tr key={o.id} className="hover:bg-stone-50 transition-colors">
+                <tr
+                  key={o.id}
+                  className="hover:bg-stone-50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedOrder(o)}
+                >
                   <td className="px-4 py-3 font-mono text-xs text-stone-400">{o.id?.slice(0, 8)}…</td>
                   <td className="px-4 py-3 text-stone-800">{o.product}</td>
                   <td className="px-4 py-3 text-stone-600">{o.client_name}</td>
@@ -433,6 +446,11 @@ function OrdersInner({
                     {o.commission_amount != null ? (
                       <span className="text-emerald-700 font-semibold text-xs">${fmt(Number(o.commission_amount))}</span>
                     ) : "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${o.commission_paid ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"}`}>
+                      {o.commission_paid ? `Paid ${new Date(o.commission_paid).toLocaleDateString()}` : "Unpaid"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-stone-400 text-xs">
                     {o.created_at ? new Date(o.created_at).toLocaleDateString() : "—"}
@@ -458,6 +476,11 @@ function OrdersInner({
           )}
         </div>
       )}
+
+      <OrderDetailDrawer
+        order={selectedOrder as OrderDetail | null}
+        onClose={() => setSelectedOrder(null)}
+      />
     </div>
   );
 }

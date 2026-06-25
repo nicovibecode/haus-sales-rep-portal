@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import OrderDetailDrawer, { OrderDetail } from "@/components/OrderDetailDrawer";
 
 interface Order {
   id: string;
@@ -39,6 +40,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   async function updateStatus(id: string, status: string) {
     const res = await fetch(`/api/admin/orders/${id}`, {
@@ -134,7 +136,11 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
               </tr>
             )}
             {filtered.map((o) => (
-              <tr key={o.id} className="hover:bg-stone-50 transition-colors">
+              <tr
+                key={o.id}
+                className="hover:bg-stone-50 transition-colors cursor-pointer"
+                onClick={() => setSelectedOrder(o)}
+              >
                 <td className="px-4 py-3 font-mono text-xs text-stone-400">{o.id?.slice(0, 8)}…</td>
                 <td className="px-4 py-3">
                   <p className="font-medium text-stone-800">{o.rep_name}</p>
@@ -160,7 +166,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                 <td className="px-4 py-3 text-stone-400 text-xs">
                   {o.created_at ? new Date(o.created_at).toLocaleDateString() : "—"}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <select
                     value={o.status}
                     onChange={(e) => updateStatus(o.id, e.target.value)}
@@ -171,7 +177,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                     ))}
                   </select>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => toggleCommissionPaid(o.id, !!o.commission_paid)}
                     className={`text-xs font-medium px-2 py-1 rounded-full cursor-pointer transition-colors ${
@@ -188,6 +194,12 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
           </tbody>
         </table>
       </div>
+
+      <OrderDetailDrawer
+        order={selectedOrder as OrderDetail | null}
+        onClose={() => setSelectedOrder(null)}
+        showRep
+      />
     </div>
   );
 }
