@@ -14,6 +14,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Ensure table exists (ignore errors if it already does)
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS samples (
+      id TEXT PRIMARY KEY,
+      rep_name TEXT,
+      rep_email TEXT,
+      client_name TEXT,
+      client_email TEXT,
+      shipping_address TEXT,
+      products TEXT,
+      notes TEXT,
+      status TEXT,
+      created_at TEXT
+    )`);
+  } catch {
+    // table likely already exists
+  }
+
   const id = uuidv4();
   const created_at = new Date().toISOString();
   const status = "Requested";

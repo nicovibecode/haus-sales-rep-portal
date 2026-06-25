@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import AdminSamplesClient from "./AdminSamplesClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminSamplesPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let samples: any[] = [];
