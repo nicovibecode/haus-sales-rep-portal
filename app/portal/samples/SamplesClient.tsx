@@ -1,11 +1,15 @@
 "use client";
 import { useState } from "react";
 import { SessionPayload } from "@/lib/session";
+import SampleDetailDrawer, { SampleDetail } from "@/components/SampleDetailDrawer";
 
 interface Sample {
   id: string;
   products: string;
   client_name: string;
+  client_email?: string | null;
+  shipping_address?: string | null;
+  notes?: string | null;
   created_at: string;
   status: string;
 }
@@ -29,6 +33,7 @@ export default function SamplesClient({
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [selectedSample, setSelectedSample] = useState<Sample | null>(null);
 
   const [form, setForm] = useState({
     client_name: "",
@@ -151,7 +156,11 @@ export default function SamplesClient({
             </thead>
             <tbody className="divide-y divide-stone-100">
               {samples.map((s) => (
-                <tr key={s.id} className="hover:bg-stone-50 transition-colors">
+                <tr
+                  key={s.id}
+                  className="hover:bg-stone-50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedSample(s)}
+                >
                   <td className="px-4 py-3 font-mono text-xs text-stone-500">{s.id?.toString().slice(0, 8)}…</td>
                   <td className="px-4 py-3 text-stone-700 text-xs max-w-xs truncate">{s.products?.toString()}</td>
                   <td className="px-4 py-3 text-stone-600">{s.client_name?.toString()}</td>
@@ -167,6 +176,11 @@ export default function SamplesClient({
           </table>
         </div>
       )}
+
+      <SampleDetailDrawer
+        sample={selectedSample as SampleDetail | null}
+        onClose={() => setSelectedSample(null)}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import SampleDetailDrawer, { SampleDetail } from "@/components/SampleDetailDrawer";
 
 interface Sample {
   id: string;
@@ -25,6 +26,7 @@ const statusStyle: Record<string, string> = {
 export default function AdminSamplesClient({ initialSamples }: { initialSamples: Sample[] }) {
   const [samples, setSamples] = useState<Sample[]>(initialSamples);
   const [search, setSearch] = useState("");
+  const [selectedSample, setSelectedSample] = useState<Sample | null>(null);
 
   async function updateStatus(id: string, status: string) {
     const res = await fetch(`/api/admin/samples/${id}`, {
@@ -72,7 +74,11 @@ export default function AdminSamplesClient({ initialSamples }: { initialSamples:
               </tr>
             )}
             {filtered.map((s) => (
-              <tr key={s.id} className="hover:bg-stone-50 transition-colors">
+              <tr
+                key={s.id}
+                className="hover:bg-stone-50 transition-colors cursor-pointer"
+                onClick={() => setSelectedSample(s)}
+              >
                 <td className="px-4 py-3 font-mono text-xs text-stone-400">{s.id?.slice(0, 8)}…</td>
                 <td className="px-4 py-3">
                   <p className="font-medium text-stone-800">{s.rep_name}</p>
@@ -86,7 +92,7 @@ export default function AdminSamplesClient({ initialSamples }: { initialSamples:
                 <td className="px-4 py-3 text-stone-400 text-xs">
                   {s.created_at ? new Date(s.created_at).toLocaleDateString() : "—"}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <select
                     value={s.status}
                     onChange={(e) => updateStatus(s.id, e.target.value)}
@@ -102,6 +108,12 @@ export default function AdminSamplesClient({ initialSamples }: { initialSamples:
           </tbody>
         </table>
       </div>
+
+      <SampleDetailDrawer
+        sample={selectedSample as SampleDetail | null}
+        onClose={() => setSelectedSample(null)}
+        showRep
+      />
     </div>
   );
 }
