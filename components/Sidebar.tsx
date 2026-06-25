@@ -97,6 +97,12 @@ const tierColors: Record<string, string> = {
   C: "bg-stone-100 text-stone-700",
 };
 
+const adminIcon = (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 1.5l5.5 2.5v3.5c0 4-2.5 6-5.5 7-3-1-5.5-3-5.5-7V4l5.5-2.5z" />
+  </svg>
+);
+
 export default function Sidebar({ session }: { session: SessionPayload }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -136,6 +142,23 @@ export default function Sidebar({ session }: { session: SessionPayload }) {
             </Link>
           );
         })}
+
+        {session.tier === "admin" && (
+          <>
+            <div className="my-3 border-t border-stone-200" />
+            <Link
+              href="/admin/orders"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                pathname.startsWith("/admin")
+                  ? "bg-stone-800 text-white"
+                  : "text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+              }`}
+            >
+              <span className="flex-shrink-0 opacity-80">{adminIcon}</span>
+              Admin Dashboard
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* Rep info + logout */}

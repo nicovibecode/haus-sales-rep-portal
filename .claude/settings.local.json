@@ -36,7 +36,8 @@
       "Bash(npm ls *)",
       "Bash(npm view *)",
       "Bash(~/.npm-global/bin/vercel inspect *)",
-      "Bash(echo \"exit:$?\")"
+      "Bash(echo \"exit:$?\")",
+      "Bash(curl -s -I https://haus-sales-rep-portal.vercel.app/admin/orders)"
     ]
   }
 }
