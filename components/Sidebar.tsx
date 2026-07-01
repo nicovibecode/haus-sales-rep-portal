@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { SessionPayload } from "@/lib/session";
 
 const navItems = [
@@ -91,13 +92,35 @@ const adminIcon = (
   </svg>
 );
 
-export default function Sidebar({ session }: { session: SessionPayload }) {
+export default function Sidebar({
+  session,
+  repList = [],
+  currentViewAs,
+}: {
+  session: SessionPayload;
+  repList?: { name: string; email: string }[];
+  currentViewAs?: string | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
+  const [switchingTo, setSwitchingTo] = useState<string | null>(null);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
+  }
+
+  async function handleViewAs(email: string) {
+    if (!email) return;
+    setSwitchingTo(email);
+    await fetch("/api/admin/view-as", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    router.push("/portal/price-list");
+    router.refresh();
+    setSwitchingTo(null);
   }
 
   return (
@@ -131,9 +154,23 @@ export default function Sidebar({ session }: { session: SessionPayload }) {
           );
         })}
 
-        {session.tier === "admin" && (
+        {repList.length > 0 && (
           <>
             <div className="my-3 border-t border-stone-200" />
+            <div className="px-3 py-1">
+              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">View as Rep</p>
+              <select
+                value={currentViewAs ?? ""}
+                onChange={(e) => handleViewAs(e.target.value)}
+                disabled={!!switchingTo}
+                className="w-full px-2.5 py-2 border border-stone-300 rounded-lg text-xs text-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-400 bg-white disabled:opacity-50"
+              >
+                <option value="">— Select a rep —</option>
+                {repList.map((r) => (
+                  <option key={r.email} value={r.email}>{r.name}</option>
+                ))}
+              </select>
+            </div>
             <Link
               href="/admin/orders"
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
