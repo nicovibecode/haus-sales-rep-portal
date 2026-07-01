@@ -20,6 +20,7 @@ interface Rep {
   region?: string;
   phone?: string;
   status?: string;
+  signupStatus: "active" | "pending";
   settings: RepSettings;
 }
 
@@ -37,12 +38,13 @@ export default function AdminRepsClient({
   reps: Rep[];
   products: Product[];
 }) {
-  const [selectedEmail, setSelectedEmail] = useState(reps[0]?.email ?? "");
+  const activeReps = reps.filter((r) => r.signupStatus === "active");
+  const [selectedEmail, setSelectedEmail] = useState(activeReps[0]?.email ?? "");
   const [disabled, setDisabled] = useState<Record<string, string[]>>(
-    Object.fromEntries(reps.map((r) => [r.email, r.settings.disabled_product_ids]))
+    Object.fromEntries(activeReps.map((r) => [r.email, r.settings.disabled_product_ids]))
   );
   const [maxDiscounts, setMaxDiscounts] = useState<Record<string, Record<string, number>>>(
-    Object.fromEntries(reps.map((r) => [r.email, r.settings.max_discounts]))
+    Object.fromEntries(activeReps.map((r) => [r.email, r.settings.max_discounts]))
   );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -92,7 +94,7 @@ export default function AdminRepsClient({
     "admin": "Admin",
   };
 
-  const rep = reps.find((r) => r.email === selectedEmail)!;
+  const rep = activeReps.find((r) => r.email === selectedEmail) ?? activeReps[0]!;
   const repDisabled = disabled[selectedEmail] ?? [];
   const repMaxDiscounts = maxDiscounts[selectedEmail] ?? DEFAULT_MAX;
 
@@ -240,43 +242,77 @@ export default function AdminRepsClient({
         )}
       </div>
 
-      {/* Rep selector */}
-      <div className="flex gap-3 mb-8">
-        {reps.map((r) => (
-          <div
-            key={r.email}
-            className={`flex items-center rounded-xl border transition-colors ${
-              selectedEmail === r.email
-                ? "bg-stone-800 border-stone-800"
-                : "bg-white border-stone-200 hover:border-stone-400"
-            }`}
-          >
-            <button
-              onClick={() => { setSelectedEmail(r.email); setSaved(false); }}
-              className={`px-4 py-2.5 text-sm font-medium ${
-                selectedEmail === r.email ? "text-white" : "text-stone-700"
-              }`}
-            >
-              {r.name}
-              <span className="ml-2 text-xs text-stone-400">Tier {r.tier}</span>
-            </button>
-            <button
-              onClick={() => setProfileRep(r)}
-              title="View profile"
-              className={`px-2.5 py-2.5 border-l ${
-                selectedEmail === r.email
-                  ? "border-stone-700 text-stone-300 hover:text-white"
-                  : "border-stone-200 text-stone-400 hover:text-stone-700"
-              }`}
-            >
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="5.5" r="2.5" />
-                <path d="M2.5 13.5c0-2.76 2.24-5 5.5-5s5.5 2.24 5.5 5" />
-              </svg>
-            </button>
-          </div>
-        ))}
+      {/* Rep roster */}
+      <div className="bg-white border border-stone-200 rounded-xl overflow-hidden mb-8">
+        <div className="px-5 py-3 border-b border-stone-100 bg-stone-50">
+          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">All Reps ({reps.length})</p>
+        </div>
+        <div className="divide-y divide-stone-100">
+          {reps.map((r) => (
+            <div key={r.email} className="flex items-center justify-between px-5 py-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-sm font-semibold text-stone-600 flex-shrink-0">
+                  {r.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-stone-800">{r.name}</p>
+                  <p className="text-xs text-stone-400">{r.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  r.signupStatus === "active"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-amber-100 text-amber-700"
+                }`}>
+                  {r.signupStatus === "active" ? "Active" : "Pending"}
+                </span>
+                {r.signupStatus === "active" && (
+                  <>
+                    <button
+                      onClick={() => { setSelectedEmail(r.email); setSaved(false); }}
+                      className="text-xs text-stone-600 border border-stone-300 px-3 py-1 rounded-lg hover:bg-stone-50 transition-colors"
+                    >
+                      Edit Settings
+                    </button>
+                    <button
+                      onClick={() => setProfileRep(r)}
+                      title="View profile"
+                      className="text-stone-400 hover:text-stone-700"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="8" cy="5.5" r="2.5" />
+                        <path d="M2.5 13.5c0-2.76 2.24-5 5.5-5s5.5 2.24 5.5 5" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* Settings panel for selected active rep */}
+      {activeReps.length > 0 && (
+        <div className="mb-4">
+          <div className="flex gap-3 mb-6">
+            {activeReps.map((r) => (
+              <button
+                key={r.email}
+                onClick={() => { setSelectedEmail(r.email); setSaved(false); }}
+                className={`px-4 py-2.5 text-sm font-medium rounded-xl border transition-colors ${
+                  selectedEmail === r.email
+                    ? "bg-stone-800 border-stone-800 text-white"
+                    : "bg-white border-stone-200 hover:border-stone-400 text-stone-700"
+                }`}
+              >
+                {r.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6">
         {/* Discount limits */}

@@ -17,18 +17,6 @@ const navItems = [
     ),
   },
   {
-    label: "Reps Sheet",
-    href: "/portal/reps",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="6" cy="5" r="2.5" />
-        <path d="M1.5 13.5c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5" />
-        <circle cx="11.5" cy="5" r="2" />
-        <path d="M14.5 13.5c0-1.933-1.343-3.553-3.157-3.965" />
-      </svg>
-    ),
-  },
-  {
     label: "FAQ",
     href: "/portal/faq",
     icon: (
